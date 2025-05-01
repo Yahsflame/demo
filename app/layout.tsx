@@ -1,5 +1,12 @@
+import { Raleway } from 'next/font/google';
 import './globals.css';
 import type { Metadata } from 'next';
+
+const raleway = Raleway({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-raleway',
+});
 
 export const metadata: Metadata = {
   title: 'Ben\'s Multi-Search Extravaganza',
@@ -20,7 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className={raleway.variable}>
       <body>{children}</body>
     </html>
   );
