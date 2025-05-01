@@ -14,6 +14,7 @@ import { handleApiResponse } from '../utils/api/handlers';
 interface MainResultsProps {
   searchQuery: string;
   selectedApis: ApiSelection;
+  onSearchComplete: () => void;
 }
 
 const initialResults: ApiResults = {
@@ -32,7 +33,7 @@ const initialStatus: ApiStatus = {
 
 const RESULTS_PER_PAGE = 10;
 
-export default function MainResults({ searchQuery, selectedApis }: MainResultsProps) {
+export default function MainResults({ searchQuery, selectedApis, onSearchComplete }: MainResultsProps) {
   const [results, setResults] = useState<ApiResults>(initialResults);
   const [status, setStatus] = useState<ApiStatus>(initialStatus);
   const [isMounted, setIsMounted] = useState(false);
@@ -110,13 +111,18 @@ export default function MainResults({ searchQuery, selectedApis }: MainResultsPr
     }
   }, [searchQuery]);
 
-  const handlePageChange = useCallback((api: string, page: number) => {
-    setCurrentPage((prev) => ({
-      ...prev,
-      [api]: page,
-    }));
-    searchApi(api, page);
-  }, [searchApi]);
+  // Effect to check if all searches are complete
+  useEffect(() => {
+    if (!isMounted) return;
+
+    const allCompleted = Object.entries(selectedApis).every(([api, selected]) => 
+      !selected || status[api as keyof ApiStatus] === 'success' || status[api as keyof ApiStatus] === 'error'
+    );
+
+    if (allCompleted) {
+      onSearchComplete();
+    }
+  }, [status, selectedApis, isMounted, onSearchComplete]);
 
   useEffect(() => {
     if (!isMounted) return;
@@ -140,6 +146,14 @@ export default function MainResults({ searchQuery, selectedApis }: MainResultsPr
       });
     };
   }, [searchQuery, selectedApis, searchApi, clearResults, isMounted]);
+
+  const handlePageChange = useCallback((api: string, page: number) => {
+    setCurrentPage((prev) => ({
+      ...prev,
+      [api]: page,
+    }));
+    searchApi(api, page);
+  }, [searchApi]);
 
   return (
     <div 

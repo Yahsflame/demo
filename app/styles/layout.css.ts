@@ -1,19 +1,39 @@
 import { style } from '@vanilla-extract/css';
 
 export const container = style({
-  display: 'flex',
-  flexDirection: 'column',
   maxWidth: '1200px',
   margin: '0 auto',
-  padding: '20px',
+  padding: '0 1rem',
+});
+
+export const header = style({
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  padding: '1rem 0',
 });
 
 export const title = style({
-  fontSize: '32px',
+  fontSize: '1.5rem',
   fontWeight: 'bold',
-  color: '#ffffff',
-  marginBottom: '20px',
-  textAlign: "center"
+  margin: 0,
+  color: 'var(--text-color)',
+});
+
+export const themeToggle = style({
+  background: 'none',
+  border: 'none',
+  cursor: 'pointer',
+  padding: '0.5rem',
+  borderRadius: '50%',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  color: 'var(--text-color)',
+  transition: 'transform 0.2s ease',
+  ':hover': {
+    transform: 'scale(1.1)',
+  },
 });
 
 export const mainGrid = style({

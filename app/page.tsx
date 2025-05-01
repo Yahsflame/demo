@@ -26,6 +26,7 @@ function ErrorFallback({ error, resetErrorBoundary }: { error: Error; resetError
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
   const [selectedApis, setSelectedApis] = useState<ApiSelection>({
     wikipedia: true,
     giphy: true,
@@ -35,6 +36,7 @@ export default function Home() {
 
   const handleSearch = useCallback((query: string) => {
     setSearchQuery(query);
+    setIsSearching(true);
   }, []);
 
   const handleApiSelectionChange = useCallback((apis: ApiSelection) => {
@@ -50,12 +52,14 @@ export default function Home() {
             onSearch={handleSearch} 
             selectedApis={selectedApis}
             onApiSelectionChange={handleApiSelectionChange}
+            isSearching={isSearching}
           />
         </ErrorBoundary>
         <ErrorBoundary FallbackComponent={ErrorFallback}>
           <MainResults 
             searchQuery={searchQuery} 
-            selectedApis={selectedApis} 
+            selectedApis={selectedApis}
+            onSearchComplete={() => setIsSearching(false)}
           />
         </ErrorBoundary>
       </div>

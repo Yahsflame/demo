@@ -1,7 +1,7 @@
 import { style } from '@vanilla-extract/css';
 
 export const resultCard = style({
-  backgroundColor: '#ffffff',
+  backgroundColor: '#f5f5f5',
   borderRadius: '8px',
   boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
   padding: '1rem',

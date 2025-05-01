@@ -12,9 +12,10 @@ interface SidebarProps {
   onSearch: (query: string) => void;
   selectedApis: ApiSelection;
   onApiSelectionChange: (apis: ApiSelection) => void;
+  isSearching: boolean;
 }
 
-export default function Sidebar({ onSearch, selectedApis, onApiSelectionChange }: SidebarProps) {
+export default function Sidebar({ onSearch, selectedApis, onApiSelectionChange, isSearching }: SidebarProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
   const handleSearch = useCallback(() => {
@@ -78,7 +79,7 @@ export default function Sidebar({ onSearch, selectedApis, onApiSelectionChange }
       />
       <button
         onClick={handleSearch}
-        disabled={!searchQuery.trim()}
+        disabled={!searchQuery.trim() || isSearching}
         className={searchStyles.searchButton}
         aria-label="Search"
       >
