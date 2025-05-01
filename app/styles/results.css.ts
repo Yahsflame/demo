@@ -158,4 +158,21 @@ export const thumbnail = style({
   height: '100%',
   objectFit: 'cover',
   borderRadius: '4px',
+});
+
+export const loadingPlaceholder = style({
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  width: '100%',
+  height: '100%',
+  backgroundColor: '#f0f0f0',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  '@media': {
+    '(prefers-reduced-motion: no-preference)': {
+      animation: 'pulse 1.5s ease-in-out infinite',
+    },
+  },
 }); 
