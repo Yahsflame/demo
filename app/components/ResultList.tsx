@@ -14,7 +14,7 @@ interface ResultListProps {
   renderResultItem: (result: SearchResult, index: number) => ReactNode;
 }
 
-const GiphyResults = memo(({ results, renderResultItem }: ResultListProps) => {
+const GiphyResults = memo(({ results }: ResultListProps) => {
   const [loadedImages, setLoadedImages] = useState<Record<number, boolean>>({});
 
   const handleImageLoad = (index: number) => {
