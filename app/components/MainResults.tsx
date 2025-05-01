@@ -1,11 +1,12 @@
-import { useState, useEffect, useCallback } from 'react';
-import axios, { AxiosResponse } from 'axios';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import axios, { AxiosResponse, CancelTokenSource } from 'axios';
 import * as styles from '../styles/layout.css';
 import ResultCard from './ResultCard';
 
 interface SearchResult {
   title: string;
   url: string;
+  thumbnail?: string;
 }
 
 interface ApiResults {
@@ -85,6 +86,47 @@ interface MainResultsProps {
   selectedApis: ApiSelection;
 }
 
+const handleApiResponse = {
+  wikipedia: (response: AxiosResponse<WikipediaResponse>) => 
+    response.data.query.search.map((item) => ({
+      title: item.title,
+      url: `https://en.wikipedia.org/?curid=${item.pageid}`,
+    })),
+  
+  giphy: (response: AxiosResponse<GiphyResponse>) => 
+    response.data.data.map((item) => ({
+      title: item.title,
+      url: item.url,
+      thumbnail: item.images.fixed_width.url,
+    })),
+  
+  news: (response: AxiosResponse<NewsResponse>) => 
+    Object.values(response.data.data).flat().map((item) => ({
+      title: item.title,
+      url: item.url,
+    })),
+  
+  youtube: (response: AxiosResponse<YouTubeResponse>) => 
+    response.data.items.map((item) => ({
+      title: item.snippet.title,
+      url: `https://www.youtube.com/watch?v=${item.id.videoId}`,
+    })),
+};
+
+const API_ENDPOINTS = {
+  wikipedia: (query: string) => 
+    `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${query}&format=json&origin=*`,
+  
+  giphy: (query: string) => 
+    `https://api.giphy.com/v1/gifs/search?api_key=${process.env.NEXT_PUBLIC_GIPHY_API_KEY}&q=${query}&limit=10`,
+  
+  news: (query: string) => 
+    `https://api.thenewsapi.com/v1/news/all?api_token=${process.env.NEXT_PUBLIC_NEWS_API_KEY}&search=${query}&limit=10&language=en&categories=general`,
+  
+  youtube: (query: string) => 
+    `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&key=${process.env.NEXT_PUBLIC_YOUTUBE_API_KEY}&maxResults=10&type=video`,
+};
+
 export default function MainResults({ searchQuery, selectedApis }: MainResultsProps) {
   const [results, setResults] = useState<ApiResults>({
     wikipedia: [],
@@ -92,6 +134,7 @@ export default function MainResults({ searchQuery, selectedApis }: MainResultsPr
     news: [],
     youtube: [],
   });
+  
   const [status, setStatus] = useState<ApiStatus>({
     wikipedia: 'idle',
     giphy: 'idle',
@@ -99,63 +142,49 @@ export default function MainResults({ searchQuery, selectedApis }: MainResultsPr
     youtube: 'idle',
   });
 
+  const cancelTokens = useRef<Record<string, CancelTokenSource>>({});
+
+  const clearResults = useCallback(() => {
+    setResults({
+      wikipedia: [],
+      giphy: [],
+      news: [],
+      youtube: [],
+    });
+    setStatus({
+      wikipedia: 'idle',
+      giphy: 'idle',
+      news: 'idle',
+      youtube: 'idle',
+    });
+  }, []);
+
   const searchApi = useCallback(async (api: string) => {
     try {
-      let response: AxiosResponse<WikipediaResponse | GiphyResponse | NewsResponse | YouTubeResponse>;
-      switch (api) {
-        case 'wikipedia':
-          response = await axios.get<WikipediaResponse>(
-            `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${searchQuery}&format=json&origin=*`
-          );
-          setResults((prev) => ({
-            ...prev,
-            wikipedia: (response.data as WikipediaResponse).query.search.map((item) => ({
-              title: item.title,
-              url: `https://en.wikipedia.org/?curid=${item.pageid}`,
-            })),
-          }));
-          break;
-        case 'giphy':
-          response = await axios.get<GiphyResponse>(
-            `https://api.giphy.com/v1/gifs/search?api_key=${process.env.NEXT_PUBLIC_GIPHY_API_KEY}&q=${searchQuery}&limit=10`
-          );
-          setResults((prev) => ({
-            ...prev,
-            giphy: (response.data as GiphyResponse).data.map((item) => ({
-              title: item.title,
-              url: item.url,
-              thumbnail: item.images.fixed_width.url,
-            })),
-          }));
-          break;
-        case 'news':
-          response = await axios.get<NewsResponse>(
-            `https://api.thenewsapi.com/v1/news/all?api_token=${process.env.NEXT_PUBLIC_NEWS_API_KEY}&search=${searchQuery}&limit=10&language=en&categories=general`
-          );
-          const newsData = (response.data as NewsResponse).data;
-          setResults((prev) => ({
-            ...prev,
-            news: Object.values(newsData).flat().map((item) => ({
-              title: item.title,
-              url: item.url,
-            })),
-          }));
-          break;
-        case 'youtube':
-          response = await axios.get<YouTubeResponse>(
-            `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${searchQuery}&key=${process.env.NEXT_PUBLIC_YOUTUBE_API_KEY}&maxResults=10&type=video`
-          );
-          setResults((prev) => ({
-            ...prev,
-            youtube: (response.data as YouTubeResponse).items.map((item) => ({
-              title: item.snippet.title,
-              url: `https://www.youtube.com/watch?v=${item.id.videoId}`,
-            })),
-          }));
-          break;
+      if (cancelTokens.current[api]) {
+        cancelTokens.current[api].cancel();
       }
+
+      const source = axios.CancelToken.source();
+      cancelTokens.current[api] = source;
+
+      setStatus((prev) => ({ ...prev, [api]: 'loading' }));
+
+      const response = await axios.get(API_ENDPOINTS[api as keyof typeof API_ENDPOINTS](searchQuery), {
+        cancelToken: source.token,
+      });
+
+      setResults((prev) => ({
+        ...prev,
+        [api]: handleApiResponse[api as keyof typeof handleApiResponse](response),
+      }));
+      
       setStatus((prev) => ({ ...prev, [api]: 'success' }));
     } catch (error) {
+      if (axios.isCancel(error)) {
+        console.log(`Request cancelled for ${api}`);
+        return;
+      }
       console.error(`Error fetching ${api} results:`, error);
       setStatus((prev) => ({ ...prev, [api]: 'error' }));
     }
@@ -163,33 +192,29 @@ export default function MainResults({ searchQuery, selectedApis }: MainResultsPr
 
   useEffect(() => {
     if (!searchQuery.trim()) {
-      // Clear all results and reset status when search query is empty
-      setResults({
-        wikipedia: [],
-        giphy: [],
-        news: [],
-        youtube: [],
-      });
-      setStatus({
-        wikipedia: 'idle',
-        giphy: 'idle',
-        news: 'idle',
-        youtube: 'idle',
-      });
+      clearResults();
       return;
     }
 
-    // Only search APIs that are currently selected
     Object.entries(selectedApis).forEach(([api, selected]) => {
       if (selected) {
-        setStatus((prev) => ({ ...prev, [api]: 'loading' }));
         searchApi(api);
       }
     });
-  }, [searchQuery, searchApi]); // Removed selectedApis from dependencies
+
+    return () => {
+      Object.values(cancelTokens.current).forEach(source => {
+        source.cancel();
+      });
+    };
+  }, [searchQuery, selectedApis, searchApi, clearResults]);
 
   return (
-    <div className={styles.resultsGrid}>
+    <div 
+      className={styles.resultsGrid}
+      role="region"
+      aria-label="Search results"
+    >
       {selectedApis.wikipedia && (
         <ResultCard
           title="Wikipedia"

@@ -1,16 +1,27 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import * as styles from './styles/layout.css';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import MainResults from './components/MainResults';
+import { ErrorBoundary } from 'react-error-boundary';
 
 interface ApiSelection {
   wikipedia: boolean;
   giphy: boolean;
   news: boolean;
   youtube: boolean;
+}
+
+function ErrorFallback({ error, resetErrorBoundary }: { error: Error; resetErrorBoundary: () => void }) {
+  return (
+    <div role="alert" className={styles.errorContainer}>
+      <h2>Something went wrong:</h2>
+      <pre>{error.message}</pre>
+      <button onClick={resetErrorBoundary}>Try again</button>
+    </div>
+  );
 }
 
 export default function Home() {
@@ -22,23 +33,31 @@ export default function Home() {
     youtube: true,
   });
 
-  const handleSearch = (query: string) => {
+  const handleSearch = useCallback((query: string) => {
     setSearchQuery(query);
-  };
+  }, []);
+
+  const handleApiSelectionChange = useCallback((apis: ApiSelection) => {
+    setSelectedApis(apis);
+  }, []);
 
   return (
     <div className={styles.container}>
       <Header />
       <div className={styles.mainGrid}>
-        <Sidebar 
-          onSearch={handleSearch} 
-          selectedApis={selectedApis}
-          onApiSelectionChange={setSelectedApis}
-        />
-        <MainResults 
-          searchQuery={searchQuery} 
-          selectedApis={selectedApis} 
-        />
+        <ErrorBoundary FallbackComponent={ErrorFallback}>
+          <Sidebar 
+            onSearch={handleSearch} 
+            selectedApis={selectedApis}
+            onApiSelectionChange={handleApiSelectionChange}
+          />
+        </ErrorBoundary>
+        <ErrorBoundary FallbackComponent={ErrorFallback}>
+          <MainResults 
+            searchQuery={searchQuery} 
+            selectedApis={selectedApis} 
+          />
+        </ErrorBoundary>
       </div>
     </div>
   );
