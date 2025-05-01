@@ -1,0 +1,19 @@
+{
+  "name": "Multi-Search",
+  "short_name": "Multi-Search",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "32x32",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/favicon.ico",
+      "sizes": "32x32",
+      "type": "image/x-icon"
+    }
+  ],
+  "theme_color": "#36454F",
+  "background_color": "#36454F",
+  "display": "standalone"
+} 
