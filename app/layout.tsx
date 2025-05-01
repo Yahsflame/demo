@@ -2,7 +2,7 @@ import './globals.css';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Multi-Search',
+  title: 'Ben\'s Multi-Search Extravaganza',
   description: 'Search across multiple APIs',
   icons: {
     icon: [

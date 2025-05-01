@@ -1,21 +1,30 @@
 import { style } from '@vanilla-extract/css';
 
 export const resultCard = style({
-  backgroundColor: 'white',
+  backgroundColor: '#ffffff',
   borderRadius: '8px',
-  padding: '20px',
   boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-  transition: 'boxShadow 0.2s',
-  ':hover': {
-    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
-  },
+  padding: '1rem',
+});
+
+export const resultTitleContainer = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  marginBottom: '1rem',
 });
 
 export const resultTitle = style({
-  margin: '0 0 16px 0',
-  fontSize: '18px',
+  fontSize: '1.25rem',
   fontWeight: 'bold',
-  color: '#333',
+  color: '#333333',
+  margin: 0,
+});
+
+export const resultCount = style({
+  fontSize: '0.875rem',
+  color: '#666666',
+  fontStyle: 'italic',
 });
 
 export const resultList = style({

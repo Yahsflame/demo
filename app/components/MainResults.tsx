@@ -110,28 +110,28 @@ export default function MainResults({ searchQuery, selectedApis }: MainResultsPr
         <ResultCard
           title="Wikipedia"
           results={results.wikipedia}
-          status={isMounted ? status.wikipedia : 'loading'}
+          status={status.wikipedia}
         />
       )}
       {selectedApis.giphy && (
         <ResultCard
           title="Giphy"
           results={results.giphy}
-          status={isMounted ? status.giphy : 'loading'}
+          status={status.giphy}
         />
       )}
       {selectedApis.news && (
         <ResultCard
           title="News"
           results={results.news}
-          status={isMounted ? status.news : 'loading'}
+          status={status.news}
         />
       )}
       {selectedApis.youtube && (
         <ResultCard
           title="YouTube"
           results={results.youtube}
-          status={isMounted ? status.youtube : 'loading'}
+          status={status.youtube}
         />
       )}
     </div>

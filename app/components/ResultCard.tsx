@@ -47,14 +47,23 @@ function ResultCard({ title, results, status }: ResultCardProps) {
     </li>
   ), [isGiphy]);
 
-  return (
-    <div 
-      className={resultStyles.resultCard}
-      role="region"
-      aria-label={`${title} results`}
-    >
-      <h3 className={resultStyles.resultTitle}>{title}</h3>
-      {status === 'loading' && (
+  const renderTitle = () => {
+    if (status === 'success') {
+      return (
+        <div className={resultStyles.resultTitleContainer}>
+          <h3 className={resultStyles.resultTitle}>{title}</h3>
+          <span className={resultStyles.resultCount}>
+            {results.length > 0 ? `Showing ${results.length} results` : 'No results'}
+          </span>
+        </div>
+      );
+    }
+    return <h3 className={resultStyles.resultTitle}>{title}</h3>;
+  };
+
+  const renderContent = () => {
+    if (status === 'loading' && results.length === 0) {
+      return (
         <div 
           className={resultStyles.loadingSpinner}
           role="status"
@@ -62,8 +71,11 @@ function ResultCard({ title, results, status }: ResultCardProps) {
         >
           <FaSpinner size={40} />
         </div>
-      )}
-      {status === 'error' && (
+      );
+    }
+
+    if (status === 'error') {
+      return (
         <div 
           className={resultStyles.errorMessage}
           role="alert"
@@ -72,8 +84,11 @@ function ResultCard({ title, results, status }: ResultCardProps) {
           <FaTimes size={40} />
           <p>Sorry, we encountered an error</p>
         </div>
-      )}
-      {status === 'success' && results.length === 0 && (
+      );
+    }
+
+    if (status === 'success' && results.length === 0) {
+      return (
         <div 
           className={resultStyles.noResults}
           role="status"
@@ -81,8 +96,11 @@ function ResultCard({ title, results, status }: ResultCardProps) {
         >
           No results found
         </div>
-      )}
-      {status === 'success' && results.length > 0 && (
+      );
+    }
+
+    if (results.length > 0) {
+      return (
         <ul 
           className={isGiphy ? resultStyles.imageGrid : resultStyles.resultList}
           role="list"
@@ -90,7 +108,20 @@ function ResultCard({ title, results, status }: ResultCardProps) {
         >
           {results.map(renderResultItem)}
         </ul>
-      )}
+      );
+    }
+
+    return null;
+  };
+
+  return (
+    <div 
+      className={resultStyles.resultCard}
+      role="region"
+      aria-label={`${title} results`}
+    >
+      {renderTitle()}
+      {renderContent()}
     </div>
   );
 }
