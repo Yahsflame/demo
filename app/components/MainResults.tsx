@@ -31,10 +31,24 @@ const initialStatus: ApiStatus = {
   youtube: 'idle',
 };
 
+const RESULTS_PER_PAGE = 10;
+
 export default function MainResults({ searchQuery, selectedApis }: MainResultsProps) {
   const [results, setResults] = useState<ApiResults>(initialResults);
   const [status, setStatus] = useState<ApiStatus>(initialStatus);
   const [isMounted, setIsMounted] = useState(false);
+  const [currentPage, setCurrentPage] = useState<Record<string, number>>({
+    wikipedia: 1,
+    giphy: 1,
+    news: 1,
+    youtube: 1,
+  });
+  const [totalResults, setTotalResults] = useState<Record<string, number>>({
+    wikipedia: 0,
+    giphy: 0,
+    news: 0,
+    youtube: 0,
+  });
   const cancelTokens = useRef<Record<string, CancelTokenSource>>({});
 
   useEffect(() => {
@@ -44,9 +58,21 @@ export default function MainResults({ searchQuery, selectedApis }: MainResultsPr
   const clearResults = useCallback(() => {
     setResults(initialResults);
     setStatus(initialStatus);
+    setCurrentPage({
+      wikipedia: 1,
+      giphy: 1,
+      news: 1,
+      youtube: 1,
+    });
+    setTotalResults({
+      wikipedia: 0,
+      giphy: 0,
+      news: 0,
+      youtube: 0,
+    });
   }, []);
 
-  const searchApi = useCallback(async (api: string) => {
+  const searchApi = useCallback(async (api: string, page: number = 1) => {
     try {
       if (cancelTokens.current[api]) {
         cancelTokens.current[api].cancel();
@@ -57,13 +83,21 @@ export default function MainResults({ searchQuery, selectedApis }: MainResultsPr
 
       setStatus((prev) => ({ ...prev, [api]: 'loading' }));
 
-      const response = await axios.get(API_ENDPOINTS[api as keyof typeof API_ENDPOINTS](searchQuery), {
+      const offset = (page - 1) * RESULTS_PER_PAGE;
+      const response = await axios.get(API_ENDPOINTS[api as keyof typeof API_ENDPOINTS](searchQuery, offset), {
         cancelToken: source.token,
       });
 
+      const newResults = handleApiResponse[api as keyof typeof handleApiResponse](response);
+      
       setResults((prev) => ({
         ...prev,
-        [api]: handleApiResponse[api as keyof typeof handleApiResponse](response),
+        [api]: newResults,
+      }));
+
+      setTotalResults((prev) => ({
+        ...prev,
+        [api]: newResults.length,
       }));
       
       setStatus((prev) => ({ ...prev, [api]: 'success' }));
@@ -77,6 +111,14 @@ export default function MainResults({ searchQuery, selectedApis }: MainResultsPr
     }
   }, [searchQuery]);
 
+  const handlePageChange = useCallback((api: string, page: number) => {
+    setCurrentPage((prev) => ({
+      ...prev,
+      [api]: page,
+    }));
+    searchApi(api, page);
+  }, [searchApi]);
+
   useEffect(() => {
     if (!isMounted) return;
 
@@ -87,7 +129,7 @@ export default function MainResults({ searchQuery, selectedApis }: MainResultsPr
 
     Object.entries(selectedApis).forEach(([api, selected]) => {
       if (selected) {
-        searchApi(api);
+        searchApi(api, 1);
       }
     });
 
@@ -111,6 +153,9 @@ export default function MainResults({ searchQuery, selectedApis }: MainResultsPr
           title="Wikipedia"
           results={results.wikipedia}
           status={status.wikipedia}
+          currentPage={currentPage.wikipedia}
+          totalResults={totalResults.wikipedia}
+          onPageChange={(page) => handlePageChange('wikipedia', page)}
         />
       )}
       {selectedApis.giphy && (
@@ -118,6 +163,9 @@ export default function MainResults({ searchQuery, selectedApis }: MainResultsPr
           title="Giphy"
           results={results.giphy}
           status={status.giphy}
+          currentPage={currentPage.giphy}
+          totalResults={totalResults.giphy}
+          onPageChange={(page) => handlePageChange('giphy', page)}
         />
       )}
       {selectedApis.news && (
@@ -125,6 +173,9 @@ export default function MainResults({ searchQuery, selectedApis }: MainResultsPr
           title="News"
           results={results.news}
           status={status.news}
+          currentPage={currentPage.news}
+          totalResults={totalResults.news}
+          onPageChange={(page) => handlePageChange('news', page)}
         />
       )}
       {selectedApis.youtube && (
@@ -132,6 +183,9 @@ export default function MainResults({ searchQuery, selectedApis }: MainResultsPr
           title="YouTube"
           results={results.youtube}
           status={status.youtube}
+          currentPage={currentPage.youtube}
+          totalResults={totalResults.youtube}
+          onPageChange={(page) => handlePageChange('youtube', page)}
         />
       )}
     </div>

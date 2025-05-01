@@ -1,10 +1,12 @@
 import { style } from '@vanilla-extract/css';
+import { ReactNode } from 'react';
 
 export const resultCard = style({
   backgroundColor: '#ffffff',
   borderRadius: '8px',
   boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
   padding: '1rem',
+  height: '300px'
 });
 
 export const resultTitleContainer = style({
@@ -24,15 +26,15 @@ export const resultTitle = style({
 export const resultCount = style({
   fontSize: '0.875rem',
   color: '#666666',
-  fontStyle: 'italic',
 });
 
 export const resultList = style({
-  height: "200px",
+  height: "170px",
   listStyle: 'none',
   overflow: "auto",
   padding: 0,
   margin: 0,
+  boxShadow: "0px 0px 3px 0px rgba(0,0,0,0.75)",
 });
 
 export const resultItem = style({
@@ -53,6 +55,11 @@ export const resultLink = style({
   },
 });
 
+export const Giphy = style({
+    display: 'grid',
+    gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr)"
+});
+
 export const loadingSpinner = style({
   display: 'flex',
   justifyContent: 'center',
@@ -70,28 +77,69 @@ export const errorMessage = style({
   justifyContent: 'center',
   height: '200px',
   color: '#dc3545',
+  textAlign: 'center',
 });
 
 export const noResults = style({
+  textAlign: 'center',
+  padding: '2rem',
+  color: '#666666',
+});
+
+export const pagination = style({
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  gap: '1rem',
+  marginTop: '1rem',
+  padding: '0.5rem',
+});
+
+export const paginationButton = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  height: '200px',
-  color: '#666',
+  width: '2rem',
+  height: '2rem',
+  borderRadius: '4px',
+  border: '1px solid #cccccc',
+  backgroundColor: '#ffffff',
+  color: '#333333',
+  cursor: 'pointer',
+  ':disabled': {
+    opacity: 0.5,
+    cursor: 'not-allowed',
+  },
+  selectors: {
+    '&:hover:not(:disabled)': {
+      backgroundColor: '#f5f5f5',
+    },
+  },
 });
 
-export const imageGrid = style({
+export const pageInfo = style({
+  fontSize: '0.875rem',
+  color: '#666666',
+});
+
+export const giphyContainer = style({
+  height: '170px',
+  overflow: 'auto',
+  padding: '0.5rem',
+  boxShadow: '0px 0px 3px 0px rgba(0,0,0,0.75)',
+});
+
+export const giphyGrid = style({
   display: 'grid',
   gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))',
-  gap: '10px',
-  padding: '10px',
-  height: '200px',
-  overflow: 'auto',
+  gap: '0.5rem',
+  listStyle: 'none',
+  padding: 0,
+  margin: 0,
 });
 
-export const imageItem = style({
-  width: '100px',
-  height: '100px',
+export const giphyItem = style({
+  aspectRatio: '1',
   overflow: 'hidden',
   borderRadius: '4px',
   transition: 'transform 0.2s',
@@ -100,7 +148,7 @@ export const imageItem = style({
   },
 });
 
-export const imageLink = style({
+export const giphyLink = style({
   display: 'block',
   width: '100%',
   height: '100%',
@@ -109,6 +157,6 @@ export const imageLink = style({
 export const thumbnail = style({
   width: '100%',
   height: '100%',
-  objectFit: 'contain',
-  backgroundColor: '#f5f5f5',
+  objectFit: 'cover',
+  borderRadius: '4px',
 }); 
