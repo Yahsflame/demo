@@ -9,7 +9,6 @@ import {
   ApiStatus, 
   ApiSelection 
 } from '../utils/api/types';
-import { API_ENDPOINTS } from '../utils/api/endpoints';
 import { handleApiResponse } from '../utils/api/handlers';
 
 interface MainResultsProps {
@@ -84,11 +83,11 @@ export default function MainResults({ searchQuery, selectedApis }: MainResultsPr
       setStatus((prev) => ({ ...prev, [api]: 'loading' }));
 
       const offset = (page - 1) * RESULTS_PER_PAGE;
-      const response = await axios.get(API_ENDPOINTS[api as keyof typeof API_ENDPOINTS](searchQuery, offset), {
+      const response = await axios.get(`/api/search?query=${encodeURIComponent(searchQuery)}&api=${api}&offset=${offset}`, {
         cancelToken: source.token,
       });
 
-      const newResults = handleApiResponse[api as keyof typeof handleApiResponse](response);
+      const newResults = handleApiResponse[api as keyof typeof handleApiResponse](response.data);
       
       setResults((prev) => ({
         ...prev,

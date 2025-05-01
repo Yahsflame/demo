@@ -1,5 +1,4 @@
 import { style } from '@vanilla-extract/css';
-import { ReactNode } from 'react';
 
 export const resultCard = style({
   backgroundColor: '#ffffff',
