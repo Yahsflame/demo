@@ -1,6 +1,7 @@
 import { memo, useCallback } from 'react';
 import { FaSpinner, FaTimes } from 'react-icons/fa';
 import * as resultStyles from '../styles/results.css';
+import Image from 'next/image';
 
 interface SearchResult {
   title: string;
@@ -30,13 +31,14 @@ function ResultCard({ title, results, status }: ResultCardProps) {
         aria-label={`Open ${result.title} in new tab`}
       >
         {isGiphy ? (
-          <img 
-            src={result.thumbnail} 
+          <Image 
+            src={result.thumbnail || ''} 
             alt={result.title}
             className={resultStyles.thumbnail}
             loading="lazy"
             width={100}
             height={100}
+            unoptimized={true}
           />
         ) : (
           result.title
