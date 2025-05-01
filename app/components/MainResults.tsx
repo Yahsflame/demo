@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import dynamic from 'next/dynamic';
 import axios, { CancelTokenSource } from 'axios';
 import * as styles from '../styles/layout.css';
 import ResultCard from './ResultCard';
@@ -32,7 +31,7 @@ const initialStatus: ApiStatus = {
   youtube: 'idle',
 };
 
-function MainResultsComponent({ searchQuery, selectedApis }: MainResultsProps) {
+export default function MainResults({ searchQuery, selectedApis }: MainResultsProps) {
   const [results, setResults] = useState<ApiResults>(initialResults);
   const [status, setStatus] = useState<ApiStatus>(initialStatus);
   const [isMounted, setIsMounted] = useState(false);
@@ -101,10 +100,6 @@ function MainResultsComponent({ searchQuery, selectedApis }: MainResultsProps) {
     };
   }, [searchQuery, selectedApis, searchApi, clearResults, isMounted]);
 
-  if (!isMounted) {
-    return null;
-  }
-
   return (
     <div 
       className={styles.resultsGrid}
@@ -115,34 +110,30 @@ function MainResultsComponent({ searchQuery, selectedApis }: MainResultsProps) {
         <ResultCard
           title="Wikipedia"
           results={results.wikipedia}
-          status={status.wikipedia}
+          status={isMounted ? status.wikipedia : 'loading'}
         />
       )}
       {selectedApis.giphy && (
         <ResultCard
           title="Giphy"
           results={results.giphy}
-          status={status.giphy}
+          status={isMounted ? status.giphy : 'loading'}
         />
       )}
       {selectedApis.news && (
         <ResultCard
           title="News"
           results={results.news}
-          status={status.news}
+          status={isMounted ? status.news : 'loading'}
         />
       )}
       {selectedApis.youtube && (
         <ResultCard
           title="YouTube"
           results={results.youtube}
-          status={status.youtube}
+          status={isMounted ? status.youtube : 'loading'}
         />
       )}
     </div>
   );
-}
-
-export default dynamic(() => Promise.resolve(MainResultsComponent), {
-  ssr: false
-}); 
+} 
