@@ -15,7 +15,7 @@ export default function ResultPagination({
   if (totalPages <= 1) return null;
 
   return (
-    <div className={styles.pagination}>
+    <div className={styles.pagination} role="navigation" aria-label="Pagination">
       <button
         className={styles.paginationButton}
         onClick={() => onPageChange(currentPage - 1)}

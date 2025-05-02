@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, Suspense } from 'react';
 import * as styles from './styles/layout.css';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import MainResults from './components/MainResults';
 import { ErrorBoundary } from 'react-error-boundary';
+import { useSearchParams } from 'next/navigation';
 
 interface ApiSelection {
   wikipedia: boolean;
@@ -24,7 +25,8 @@ function ErrorFallback({ error, resetErrorBoundary }: { error: Error; resetError
   );
 }
 
-export default function Home() {
+function SearchComponent() {
+  const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [selectedApis, setSelectedApis] = useState<ApiSelection>({
@@ -33,6 +35,19 @@ export default function Home() {
     news: true,
     youtube: true,
   });
+
+  useEffect(() => {
+    const apiParam = searchParams.get('api');
+    if (apiParam) {
+      const apis = apiParam.split(',');
+      setSelectedApis({
+        wikipedia: apis.includes('wikipedia'),
+        giphy: apis.includes('giphy'),
+        news: apis.includes('news'),
+        youtube: apis.includes('youtube'),
+      });
+    }
+  }, [searchParams]);
 
   const handleSearch = useCallback((query: string) => {
     setSearchQuery(query);
@@ -64,5 +79,15 @@ export default function Home() {
         </ErrorBoundary>
       </div>
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <ErrorBoundary fallback={<div>Something went wrong</div>}>
+      <Suspense fallback={<div>Loading...</div>}>
+        <SearchComponent />
+      </Suspense>
+    </ErrorBoundary>
   );
 }
