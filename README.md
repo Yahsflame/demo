@@ -48,3 +48,5 @@ To learn more about Next.js, take a look at the following resources:
 The easiest way to deploy your **Mini Search** app is deploying from the [Vercel CLI](https://vercel.com/docs/cli/deploying-from-cli).
 
 Check out [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+Small change for vercel branch kickoff
